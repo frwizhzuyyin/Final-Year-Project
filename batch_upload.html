@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Batch Upload - CRRT CDSS</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+:root{
+    --primary:#2563eb;
+    --bg:#f5f8fc;
+    --text:#0f172a;
+    --muted:#64748b;
+    --border:#e2e8f0;
+    --danger:#ef4444;
+    --warning:#f97316;
+    --success:#22c55e;
+}
+
+body{
+    margin:0;
+    font-family:'Segoe UI',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+}
+
+.app{
+    display:flex;
+    min-height:100vh;
+}
+
+.sidebar{
+    width:250px;
+    background:white;
+    border-right:1px solid var(--border);
+    position:fixed;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+}
+
+.logo{
+    padding:20px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    border-bottom:1px solid var(--border);
+}
+
+.logo-icon{
+    width:42px;
+    height:42px;
+    background:var(--primary);
+    color:white;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+}
+
+.logo h4{
+    margin:0;
+    font-weight:700;
+}
+
+.logo span{
+    font-size:12px;
+    color:var(--muted);
+}
+
+.nav-menu{
+    padding:15px 12px;
+    flex:1;
+}
+
+.nav-menu a{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 14px;
+    color:#334155;
+    text-decoration:none;
+    border-radius:10px;
+    margin-bottom:6px;
+    font-weight:500;
+    font-size:14px;
+}
+
+.nav-menu a:hover,
+.nav-menu a.active{
+    background:#eaf2ff;
+    color:var(--primary);
+}
+
+.system-status{
+    margin:16px;
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    border-radius:14px;
+    padding:15px;
+    font-size:13px;
+}
+
+.status-dot{
+    width:8px;
+    height:8px;
+    background:var(--success);
+    border-radius:50%;
+    display:inline-block;
+    margin-right:6px;
+}
+
+.main{
+    margin-left:250px;
+    width:calc(100% - 250px);
+}
+
+.topbar{
+    background:white;
+    border-bottom:1px solid var(--border);
+    padding:14px 28px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.user-info{
+    text-align:right;
+    font-size:13px;
+}
+
+.user-info strong{
+    display:block;
+}
+
+.content{
+    padding:30px 40px;
+}
+
+.page-title h2{
+    font-weight:700;
+    margin:0;
+}
+
+.page-title p{
+    color:var(--muted);
+    margin:5px 0 25px;
+}
+
+.upload-card,
+.result-table-section{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:28px;
+    box-shadow:0 4px 12px rgba(15,23,42,.04);
+}
+
+.drop-zone{
+    border:2px dashed #cbd5e1;
+    border-radius:18px;
+    background:#f8fbff;
+    padding:55px 30px;
+    text-align:center;
+    cursor:pointer;
+    transition:.25s;
+}
+
+.drop-zone:hover,
+.drop-zone.dragover{
+    border-color:var(--primary);
+    background:#eff6ff;
+}
+
+.drop-zone i{
+    font-size:52px;
+    color:var(--primary);
+    margin-bottom:15px;
+}
+
+.drop-zone h5{
+    font-weight:700;
+}
+
+.drop-zone p{
+    color:var(--muted);
+}
+
+#csvFile{
+    display:none;
+}
+
+.file-pill{
+    display:none;
+    align-items:center;
+    gap:12px;
+    background:#dcfce7;
+    border:1px solid #86efac;
+    border-radius:12px;
+    padding:13px 18px;
+    margin-top:18px;
+}
+
+.file-pill span{
+    flex:1;
+    font-weight:600;
+}
+
+.remove-file{
+    border:none;
+    background:none;
+    color:var(--danger);
+}
+
+.notice{
+    margin-top:25px;
+    background:#eff6ff;
+    border-left:4px solid var(--primary);
+    border-radius:12px;
+    padding:18px 22px;
+    color:#1e3a8a;
+    font-size:14px;
+}
+
+.btn-upload{
+    background:var(--primary);
+    color:white;
+    border:none;
+    border-radius:12px;
+    padding:13px 28px;
+    font-weight:700;
+}
+
+.btn-upload:hover{
+    background:#1d4ed8;
+    color:white;
+}
+
+.btn-confirm{
+    background:var(--success);
+    color:white;
+    border:none;
+    border-radius:12px;
+    padding:13px 28px;
+    font-weight:700;
+}
+
+.btn-confirm:hover{
+    background:#16a34a;
+    color:white;
+}
+
+.result-table-section{
+    margin-top:25px;
+}
+
+.table thead th{
+    background:#0f172a;
+    color:white;
+    font-size:12px;
+    text-transform:uppercase;
+    white-space:nowrap;
+}
+
+.table tbody td{
+    white-space:nowrap;
+}
+
+.risk-badge{
+    padding:5px 12px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:700;
+}
+
+.badge-high{background:#fee2e2;color:var(--danger);}
+.badge-medium{background:#ffedd5;color:var(--warning);}
+.badge-low{background:#dcfce7;color:var(--success);}
+
+.probability-high{color:var(--danger);font-weight:700;}
+.probability-medium{color:var(--warning);font-weight:700;}
+.probability-low{color:var(--success);font-weight:700;}
+
+.step-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:#eaf2ff;
+    color:var(--primary);
+    padding:8px 14px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:700;
+    margin-bottom:15px;
+}
+
+@media(max-width:900px){
+    .sidebar{
+        position:relative;
+        width:100%;
+        height:auto;
+    }
+
+    .app{
+        flex-direction:column;
+    }
+
+    .main{
+        margin-left:0;
+        width:100%;
+    }
+
+    .content{
+        padding:25px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<aside class="sidebar">
+
+    <div class="logo">
+        <div class="logo-icon">
+            <i class="fas fa-heartbeat"></i>
+        </div>
+        <div>
+            <h4>CRRT<span style="color:#2563eb;">CDSS</span></h4>
+            <span>Clinical Decision Support</span>
+        </div>
+    </div>
+
+    <nav class="nav-menu">
+        <a href="/dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="/patient_input"><i class="fas fa-user-plus"></i> Patient Input</a>
+        <a href="/batch_upload_page" class="active"><i class="fas fa-upload"></i> Batch Upload</a>
+        <a href="/history_page"><i class="fas fa-history"></i> History</a>
+        <a href="/results_page"><i class="fas fa-chart-line"></i> Results</a>
+        <a href="/triage_page"><i class="fas fa-triangle-exclamation"></i> Triage</a>
+        <a href="/reports_page"><i class="fas fa-file-medical"></i> Reports</a>
+    </nav>
+
+    <div class="system-status">
+        <strong>System Status</strong><br>
+        <span class="status-dot"></span>
+        Online & Connected
+    </div>
+
+</aside>
+
+<main class="main">
+
+    <div class="topbar">
+        <div>
+            <strong>Batch Patient Upload</strong>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <div class="user-info">
+                <strong>Dr. zuyyin</strong>
+                <span>St. Mary’s General Hospital</span>
+            </div>
+
+            <a href="/logout" class="btn btn-outline-danger btn-sm">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <div class="page-title">
+            <h2>Batch Upload</h2>
+            <p>Upload CSV files, preview records, then confirm to run CRRT predictions.</p>
+        </div>
+
+        <div class="upload-card">
+
+            <span class="step-badge">
+                <i class="fas fa-1"></i>
+                Step 1: Upload file for Preview
+            </span>
+
+            <div class="drop-zone" id="dropZone" onclick="document.getElementById('csvFile').click()">
+                <i class="fas fa-file-csv"></i>
+                <h5>Drag & drop your file here</h5>
+                <p>or click to browse from your computer</p>
+                <p>Supported formats: CSV (.csv) and Excel (.xlsx)</p>
+
+                <button class="btn btn-outline-primary"
+                        onclick="event.stopPropagation(); document.getElementById('csvFile').click()">
+                    <i class="fas fa-folder-open me-2"></i> Browse File
+                </button>
+
+                <input type="file" id="csvFile" accept=".csv,.xlsx"></div>
+
+            <div class="file-pill" id="filePill">
+                <i class="fas fa-file-csv text-success"></i>
+                <span id="fileName">—</span>
+                <button class="remove-file" onclick="clearFile()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="notice">
+                <i class="fas fa-circle-info"></i>
+                <strong>Required File Columns:</strong>
+                patient_id, patient_name, age, gender, creatinine, lactate, ph, bun, map, urine_output.
+            </div>
+
+            <div class="d-flex align-items-center gap-3 mt-4 flex-wrap">
+                <button class="btn-upload" id="previewBtn" onclick="previewCSV()" disabled>
+                    <i class="fas fa-eye me-2"></i>
+                    Preview Data
+                </button>
+
+                <button class="btn-confirm" id="confirmBtn" onclick="confirmBatch()" disabled>
+                    <i class="fas fa-check-circle me-2"></i>
+                    Confirm Predict & Save
+                </button>
+
+                <a href="/export_pdf" target="_blank" class="btn btn-outline-danger">
+                    <i class="fas fa-file-pdf me-2"></i>
+                    Open Batch PDF
+                </a>
+
+                <span id="uploadStatus" class="text-muted small"></span>
+            </div>
+
+        </div>
+
+        <div id="resultArea" class="mt-4"></div>
+
+    </div>
+
+</main>
+
+</div>
+
+<script>
+const dropZone = document.getElementById("dropZone");
+const fileInput = document.getElementById("csvFile");
+const filePill = document.getElementById("filePill");
+const fileNameEl = document.getElementById("fileName");
+const previewBtn = document.getElementById("previewBtn");
+const confirmBtn = document.getElementById("confirmBtn");
+
+fileInput.addEventListener("change", () => {
+    if (fileInput.files.length) {
+        setFile(fileInput.files[0]);
+    }
+});
+
+dropZone.addEventListener("dragover", e => {
+    e.preventDefault();
+    dropZone.classList.add("dragover");
+});
+
+dropZone.addEventListener("dragleave", () => {
+    dropZone.classList.remove("dragover");
+});
+
+dropZone.addEventListener("drop", e => {
+    e.preventDefault();
+    dropZone.classList.remove("dragover");
+
+    const file = e.dataTransfer.files[0];
+
+    if (
+    file &&
+    (
+        file.name.toLowerCase().endsWith(".csv") ||
+        file.name.toLowerCase().endsWith(".xlsx")
+    )
+    ) {
+        fileInput.files = e.dataTransfer.files;
+        setFile(file);
+    } else {
+        showAlert(
+    "danger",
+    "Please upload a valid CSV or Excel (.xlsx) file."
+    );
+    }
+});
+
+function setFile(file){
+    fileNameEl.textContent = file.name;
+    filePill.style.display = "flex";
+    previewBtn.disabled = false;
+    confirmBtn.disabled = true;
+    document.getElementById("resultArea").innerHTML = "";
+    document.getElementById("uploadStatus").textContent = "";
+}
+
+function clearFile(){
+    fileInput.value = "";
+    filePill.style.display = "none";
+    previewBtn.disabled = true;
+    confirmBtn.disabled = true;
+    document.getElementById("resultArea").innerHTML = "";
+    document.getElementById("uploadStatus").textContent = "";
+}
+
+async function previewCSV(){
+
+    const file = fileInput.files[0];
+
+    if (!file) {
+        showAlert("warning", "Please select a CSV or Excel  file first.");
+        return;
+    }
+
+    previewBtn.disabled = true;
+    confirmBtn.disabled = true;
+    previewBtn.innerHTML =
+        '<span class="spinner-border spinner-border-sm me-2"></span> Previewing...';
+
+    document.getElementById("resultArea").innerHTML = "";
+    document.getElementById("uploadStatus").textContent = "";
+
+    try {
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch("/batch-preview", {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || "Preview failed.");
+        }
+
+        showAlert("success", result.message);
+        renderPreviewTable(result.data);
+
+        confirmBtn.disabled = false;
+
+        document.getElementById("uploadStatus").textContent =
+            `${result.data.length} records ready for confirmation`;
+
+    } catch (error) {
+
+        showAlert("danger", error.message);
+
+    } finally {
+
+        previewBtn.disabled = false;
+        previewBtn.innerHTML =
+            '<i class="fas fa-eye me-2"></i> Preview Data';
+    }
+}
+
+async function confirmBatch(){
+
+    confirmBtn.disabled = true;
+    previewBtn.disabled = true;
+
+    confirmBtn.innerHTML =
+        '<span class="spinner-border spinner-border-sm me-2"></span> Predicting...';
+
+    try {
+
+        const response = await fetch("/batch-confirm", {
+            method: "POST"
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || "Batch confirmation failed.");
+        }
+
+        showAlert("success", result.message);
+        renderResultTable(result.results);
+
+        document.getElementById("uploadStatus").textContent =
+            `${result.results.length} records predicted and saved`;
+
+    } catch (error) {
+
+        showAlert("danger", error.message);
+        confirmBtn.disabled = false;
+
+    } finally {
+
+        previewBtn.disabled = false;
+        confirmBtn.innerHTML =
+            '<i class="fas fa-check-circle me-2"></i> Confirm Predict & Save';
+    }
+}
+
+function renderPreviewTable(records){
+
+    const rows = records.map((p, index) => {
+        return `
+            <tr>
+                <td><strong>#${index + 1}</strong></td>
+                <td>${p.patient_id || "—"}</td>
+                <td>${p.patient_name || "—"}</td>
+                <td>${p.age ?? "—"}</td>
+                <td>${p.gender || "—"}</td>
+                <td>${p.creatinine ?? "—"}</td>
+                <td>${p.lactate ?? "—"}</td>
+                <td>${p.ph ?? "—"}</td>
+                <td>${p.bun ?? "—"}</td>
+                <td>${p.map ?? "—"}</td>
+                <td>${p.urine_output ?? "—"}</td>
+            </tr>
+        `;
+    }).join("");
+
+    document.getElementById("resultArea").innerHTML += `
+        <div class="result-table-section">
+            <span class="step-badge">
+                <i class="fas fa-2"></i>
+                Step 2: Preview Records
+            </span>
+
+            <h5 class="mb-3">
+                <i class="fas fa-table text-primary me-2"></i>
+                File Preview
+            </h5>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Patient ID</th>
+                            <th>Patient Name</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Creatinine</th>
+                            <th>Lactate</th>
+                            <th>pH</th>
+                            <th>BUN</th>
+                            <th>MAP</th>
+                            <th>Urine Output</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+
+            <div class="alert alert-warning mt-3 mb-0">
+                <i class="fas fa-triangle-exclamation me-2"></i>
+                Please review the data carefully. Click <strong>Confirm Predict & Save</strong> to run prediction and save records.
+            </div>
+        </div>
+    `;
+}
+
+function renderResultTable(predictions){
+
+    const rows = predictions.map((p, index) => {
+
+        const tier = getRiskTier(p.risk_level);
+
+        const probability =
+            p.crrt_probability != null
+            ? (p.crrt_probability * 100).toFixed(2) + "%"
+            : "N/A";
+
+        return `
+            <tr>
+                <td><strong>#${index + 1}</strong></td>
+                <td>${p.patient_id || "—"}</td>
+                <td>${p.patient_name || "—"}</td>
+                <td>${p.age ?? "—"}</td>
+                <td>${p.gender || "—"}</td>
+                <td>${p.creatinine ?? "—"}</td>
+                <td>${p.lactate ?? "—"}</td>
+                <td>${p.ph ?? "—"}</td>
+                <td>${p.bun ?? "—"}</td>
+                <td>${p.map ?? "—"}</td>
+                <td>${p.urine_output ?? "—"}</td>
+                <td class="probability-${tier}">${probability}</td>
+                <td>
+                    <span class="risk-badge badge-${tier}">
+                        ${p.risk_level || "Unknown"}
+                    </span>
+                </td>
+            </tr>
+        `;
+    }).join("");
+
+    document.getElementById("resultArea").innerHTML += `
+        <div class="result-table-section">
+            <span class="step-badge">
+                <i class="fas fa-3"></i>
+                Step 3: Prediction Results Saved
+            </span>
+
+            <h5 class="mb-3">
+                <i class="fas fa-circle-check text-success me-2"></i>
+                Prediction Results
+            </h5>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Patient ID</th>
+                            <th>Patient Name</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Creatinine</th>
+                            <th>Lactate</th>
+                            <th>pH</th>
+                            <th>BUN</th>
+                            <th>MAP</th>
+                            <th>Urine Output</th>
+                            <th>Probability</th>
+                            <th>Risk Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function getRiskTier(riskLevel){
+    const r = (riskLevel || "").toLowerCase();
+
+    if (r.includes("high")) return "high";
+    if (r.includes("medium")) return "medium";
+    return "low";
+}
+
+function showAlert(type, message){
+
+    const alertClass = {
+        success: "alert-success",
+        danger: "alert-danger",
+        warning: "alert-warning",
+        info: "alert-info"
+    }[type] || "alert-info";
+
+    document.getElementById("resultArea").innerHTML =
+        `<div class="alert ${alertClass}">${message}</div>`;
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

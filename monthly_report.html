@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Monthly Report - CRRT CDSS</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+body{
+    background:#f5f8fc;
+    font-family:'Segoe UI',sans-serif;
+    color:#0f172a;
+}
+
+.report-header{
+    background:linear-gradient(135deg,#f97316,#c2410c);
+    color:white;
+    border-radius:20px;
+    padding:30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 10px 25px rgba(249,115,22,.2);
+}
+
+.report-header h2{
+    font-weight:700;
+}
+
+.report-header p{
+    opacity:.9;
+}
+
+.action-card{
+    background:white;
+    padding:20px;
+    border-radius:16px;
+    box-shadow:0 4px 12px rgba(15,23,42,.05);
+}
+
+.filter-card{
+    background:white;
+    padding:22px;
+    border-radius:16px;
+    box-shadow:0 4px 12px rgba(15,23,42,.05);
+}
+
+.form-label{
+    font-weight:700;
+    color:#334155;
+    font-size:14px;
+}
+
+.form-control,
+.form-select{
+    border:1px solid #e2e8f0;
+    border-radius:10px;
+    padding:12px 14px;
+}
+
+.form-control:focus,
+.form-select:focus{
+    border-color:#f97316;
+    box-shadow:0 0 0 3px rgba(249,115,22,.12);
+}
+
+.summary-card{
+    background:white;
+    border-radius:16px;
+    padding:22px;
+    text-align:center;
+    box-shadow:0 4px 12px rgba(15,23,42,.05);
+    transition:.3s;
+}
+
+.summary-card:hover{
+    transform:translateY(-3px);
+}
+
+.summary-card h6{
+    color:#64748b;
+    font-size:14px;
+    margin-bottom:10px;
+}
+
+.summary-card h2{
+    font-weight:800;
+    margin:0;
+}
+
+.total h2{ color:#2563eb; }
+.high h2{ color:#ef4444; }
+.medium h2{ color:#f97316; }
+.low h2{ color:#22c55e; }
+
+.table-card{
+    background:white;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 4px 12px rgba(15,23,42,.05);
+}
+
+.table{
+    margin:0;
+}
+
+.table thead th{
+    background:#0f172a;
+    color:white;
+    border:none;
+    padding:15px;
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+}
+
+.table tbody td{
+    padding:14px;
+    vertical-align:middle;
+}
+
+.risk-badge{
+    padding:6px 14px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:700;
+}
+
+.badge-high{
+    background:#fee2e2;
+    color:#ef4444;
+}
+
+.badge-medium{
+    background:#ffedd5;
+    color:#f97316;
+}
+
+.badge-low{
+    background:#dcfce7;
+    color:#22c55e;
+}
+
+.prob-high{
+    color:#ef4444;
+    font-weight:700;
+}
+
+.prob-medium{
+    color:#f97316;
+    font-weight:700;
+}
+
+.prob-low{
+    color:#22c55e;
+    font-weight:700;
+}
+
+.status-box{
+    border-radius:12px;
+    padding:15px 18px;
+}
+
+@media(max-width:768px){
+    .report-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container-fluid p-4">
+
+    <!-- HEADER -->
+    <div class="report-header mb-4">
+
+        <div>
+            <h2 class="mb-1">
+                <i class="fas fa-calendar-alt me-2"></i>
+                Monthly Assessment Report
+            </h2>
+
+            <p class="mb-0">
+                Generate monthly CRRT assessment report by selected month and year
+            </p>
+        </div>
+
+        <a href="/reports_page" class="btn btn-light">
+            <i class="fas fa-arrow-left me-1"></i>
+            Back to Reports
+        </a>
+
+    </div>
+
+    <!-- FILTER -->
+    <div class="filter-card mb-4">
+
+        <div class="row g-3 align-items-end">
+
+            <div class="col-md-4">
+                <label class="form-label">Select Month</label>
+                <select id="reportMonth" class="form-select">
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Select Year</label>
+                <input type="number" id="reportYear" class="form-control" value="2026">
+            </div>
+
+            <div class="col-md-4">
+                <button
+                    class="btn btn-primary w-100"
+                    onclick="generateMonthlyReport()">
+
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Generate Report
+
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="action-card mb-4">
+
+        <div class="d-flex gap-2 flex-wrap">
+
+            <button
+                class="btn btn-danger"
+                onclick="openMonthlyPDF()">
+
+                <i class="fas fa-file-pdf me-1"></i>
+                Export PDF
+
+            </button>
+
+            <button
+                class="btn btn-success"
+                onclick="window.location.href='/export_monthly_csv'">
+
+                <i class="fas fa-file-csv me-1"></i>
+                Export CSV
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- STATUS MESSAGE -->
+    <div id="statusMessage" class="alert status-box d-none"></div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="row mb-4">
+
+        <div class="col-md-3 mb-3">
+            <div class="summary-card total">
+                <h6>Total Patients</h6>
+                <h2 id="monthlyTotal">0</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="summary-card high">
+                <h6>High Risk</h6>
+                <h2 id="monthlyHigh">0</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="summary-card medium">
+                <h6>Medium Risk</h6>
+                <h2 id="monthlyMedium">0</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="summary-card low">
+                <h6>Low Risk</h6>
+                <h2 id="monthlyLow">0</h2>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead>
+                    <tr>
+                        <th>Patient Code</th>
+                        <th>Patient Name</th>
+                        <th>Probability</th>
+                        <th>Risk Level</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+
+                <tbody id="monthlyTableBody">
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            Select month and year, then click Generate Report.
+                        </td>
+                    </tr>
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+    const today =
+        new Date();
+
+    document.getElementById("reportMonth").value =
+        today.getMonth() + 1;
+
+    document.getElementById("reportYear").value =
+        today.getFullYear();
+
+});
+
+async function generateMonthlyReport(){
+
+    const status =
+        document.getElementById("statusMessage");
+
+    status.className = "alert alert-info status-box";
+    status.innerHTML =
+        '<i class="fas fa-spinner fa-spin me-2"></i>Generating monthly report...';
+
+    await loadMonthlyReport();
+
+    status.className = "alert alert-success status-box";
+    status.innerHTML =
+        '<i class="fas fa-check-circle me-2"></i>Monthly report generated successfully.';
+}
+
+async function loadMonthlyReport(){
+
+    try {
+
+        const month =
+            document.getElementById("reportMonth").value;
+
+        const year =
+            document.getElementById("reportYear").value;
+
+        const response =
+            await fetch(`/api/monthly_report?month=${month}&year=${year}`);
+
+        const data =
+            await response.json();
+
+        let tbody =
+            document.getElementById("monthlyTableBody");
+
+        tbody.innerHTML = "";
+
+        let high = 0;
+        let medium = 0;
+        let low = 0;
+
+        if (!data || data.length === 0) {
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        No monthly assessment records found for the selected month.
+                    </td>
+                </tr>
+            `;
+
+            document.getElementById("monthlyTotal").innerText = 0;
+            document.getElementById("monthlyHigh").innerText = 0;
+            document.getElementById("monthlyMedium").innerText = 0;
+            document.getElementById("monthlyLow").innerText = 0;
+
+            return;
+        }
+
+        data.forEach(row => {
+
+            const risk =
+                (row.risk_level || "").toUpperCase();
+
+            let badgeClass = "badge-low";
+            let probClass = "prob-low";
+
+            if (risk === "HIGH") {
+                high++;
+                badgeClass = "badge-high";
+                probClass = "prob-high";
+            }
+
+            else if (risk === "MEDIUM") {
+                medium++;
+                badgeClass = "badge-medium";
+                probClass = "prob-medium";
+            }
+
+            else {
+                low++;
+            }
+
+            const probability =
+                (parseFloat(row.crrt_probability || 0) * 100).toFixed(2);
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${row.patient_code || "-"}</strong></td>
+                    <td>${row.full_name || "-"}</td>
+                    <td class="${probClass}">${probability}%</td>
+                    <td>
+                        <span class="risk-badge ${badgeClass}">
+                            ${row.risk_level || "-"}
+                        </span>
+                    </td>
+                    <td>${row.created_at || "-"}</td>
+                </tr>
+            `;
+
+        });
+
+        document.getElementById("monthlyTotal").innerText = data.length;
+        document.getElementById("monthlyHigh").innerText = high;
+        document.getElementById("monthlyMedium").innerText = medium;
+        document.getElementById("monthlyLow").innerText = low;
+
+    } catch (error) {
+
+        console.error(error);
+
+        document.getElementById("statusMessage").className =
+            "alert alert-danger status-box";
+
+        document.getElementById("statusMessage").innerHTML =
+            '<i class="fas fa-exclamation-triangle me-2"></i>Failed to generate monthly report.';
+    }
+}
+
+function openMonthlyPDF(){
+
+    const month =
+        document.getElementById("reportMonth").value;
+
+    const year =
+        document.getElementById("reportYear").value;
+
+    window.open(
+        `/generate_monthly_pdf?month=${month}&year=${year}`,
+        "_blank"
+    );
+}
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

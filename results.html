@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prediction Results - CRRT CDSS</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+:root{
+    --primary:#2563eb;
+    --bg:#f5f8fc;
+    --text:#0f172a;
+    --muted:#64748b;
+    --border:#e2e8f0;
+    --danger:#ef4444;
+    --warning:#f97316;
+    --success:#22c55e;
+}
+
+body{
+    margin:0;
+    font-family:'Segoe UI',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+}
+
+.app{
+    display:flex;
+    min-height:100vh;
+}
+
+.sidebar{
+    width:250px;
+    background:white;
+    border-right:1px solid var(--border);
+    position:fixed;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+}
+
+.logo{
+    padding:20px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    border-bottom:1px solid var(--border);
+}
+
+.logo-icon{
+    width:42px;
+    height:42px;
+    background:var(--primary);
+    color:white;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+}
+
+.logo h4{
+    margin:0;
+    font-weight:700;
+}
+
+.logo span{
+    font-size:12px;
+    color:var(--muted);
+}
+
+.nav-menu{
+    padding:15px 12px;
+    flex:1;
+}
+
+.nav-menu a{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 14px;
+    color:#334155;
+    text-decoration:none;
+    border-radius:10px;
+    margin-bottom:6px;
+    font-weight:500;
+    font-size:14px;
+}
+
+.nav-menu a:hover,
+.nav-menu a.active{
+    background:#eaf2ff;
+    color:var(--primary);
+}
+
+.system-status{
+    margin:16px;
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    border-radius:14px;
+    padding:15px;
+    font-size:13px;
+}
+
+.status-dot{
+    width:8px;
+    height:8px;
+    background:var(--success);
+    border-radius:50%;
+    display:inline-block;
+    margin-right:6px;
+}
+
+.main{
+    margin-left:250px;
+    width:calc(100% - 250px);
+}
+
+.topbar{
+    background:white;
+    border-bottom:1px solid var(--border);
+    padding:14px 28px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.user-info{
+    text-align:right;
+    font-size:13px;
+}
+
+.user-info strong{
+    display:block;
+}
+
+.content{
+    padding:30px 40px;
+}
+
+.page-title h2{
+    font-weight:700;
+    margin:0;
+}
+
+.page-title p{
+    color:var(--muted);
+    margin:5px 0 25px;
+}
+
+.card-box{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:26px;
+    box-shadow:0 4px 12px rgba(15,23,42,.04);
+    margin-bottom:24px;
+}
+
+.profile-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:16px;
+}
+
+.profile-item{
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px 16px;
+}
+
+.profile-item small{
+    display:block;
+    color:var(--muted);
+    font-weight:600;
+    margin-bottom:5px;
+}
+
+.profile-item strong{
+    color:var(--primary);
+}
+
+.result-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:22px;
+}
+
+.probability-display{
+    font-size:52px;
+    font-weight:800;
+    margin:10px 0;
+}
+
+.probability-high{color:var(--danger);}
+.probability-medium{color:var(--warning);}
+.probability-low{color:var(--success);}
+
+.progress{
+    height:14px;
+    border-radius:999px;
+    background:#e2e8f0;
+}
+
+.risk-badge{
+    display:inline-block;
+    margin-top:14px;
+    padding:7px 16px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:800;
+    text-transform:uppercase;
+}
+
+.badge-high{background:#fee2e2;color:var(--danger);}
+.badge-medium{background:#ffedd5;color:var(--warning);}
+.badge-low{background:#dcfce7;color:var(--success);}
+
+.priority-circle{
+    width:135px;
+    height:135px;
+    border-radius:50%;
+    margin:18px auto 12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:42px;
+    font-weight:800;
+    color:white;
+}
+
+.priority-p1{background:linear-gradient(135deg,#ef4444,#b91c1c);}
+.priority-p2{background:linear-gradient(135deg,#f97316,#c2410c);}
+.priority-p3{background:linear-gradient(135deg,#22c55e,#15803d);}
+
+.priority-text{
+    text-align:center;
+    font-weight:700;
+    font-size:18px;
+}
+
+.interpretation{
+    background:#eff6ff;
+    border-left:4px solid var(--primary);
+    border-radius:14px;
+    padding:20px 24px;
+    color:#1e3a8a;
+}
+
+.disclaimer{
+    background:#fff7ed;
+    border:1px solid #fed7aa;
+    border-left:4px solid var(--warning);
+    border-radius:14px;
+    padding:20px 24px;
+    color:#9a3412;
+}
+
+.action-buttons{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+@media(max-width:900px){
+    .sidebar{
+        position:relative;
+        width:100%;
+        height:auto;
+    }
+
+    .app{
+        flex-direction:column;
+    }
+
+    .main{
+        margin-left:0;
+        width:100%;
+    }
+
+    .content{
+        padding:25px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<aside class="sidebar">
+
+    <div class="logo">
+        <div class="logo-icon">
+            <i class="fas fa-heartbeat"></i>
+        </div>
+        <div>
+            <h4>CRRT<span style="color:#2563eb;">CDSS</span></h4>
+            <span>Clinical Decision Support</span>
+        </div>
+    </div>
+
+    <nav class="nav-menu">
+        <a href="/dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="/patient_input"><i class="fas fa-user-plus"></i> Patient Input</a>
+        <a href="/batch_upload_page"><i class="fas fa-upload"></i> Batch Upload</a>
+        <a href="/history_page"><i class="fas fa-history"></i> History</a>
+        <a href="/results_page" class="active"><i class="fas fa-chart-line"></i> Results</a>
+        <a href="/triage_page"><i class="fas fa-triangle-exclamation"></i> Triage</a>
+        <a href="/reports_page"><i class="fas fa-file-medical"></i> Reports</a>
+    </nav>
+
+    <div class="system-status">
+        <strong>System Status</strong><br>
+        <span class="status-dot"></span>
+        Online & Connected
+    </div>
+
+</aside>
+
+<main class="main">
+
+    <div class="topbar">
+        <div>
+            <strong>Prediction Results</strong>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <div class="user-info">
+                <strong>Dr. zuyyin</strong>
+                <span>St. Mary’s General Hospital</span>
+            </div>
+
+            <a href="/logout" class="btn btn-outline-danger btn-sm">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <div class="page-title">
+            <h2>CRRT Prediction Results</h2>
+            <p>AI-generated CRRT risk assessment based on patient clinical parameters.</p>
+        </div>
+
+        <div class="card-box">
+            <h5 class="mb-3">
+                <i class="fas fa-user-md text-primary me-2"></i>
+                Patient Clinical Profile
+            </h5>
+
+            <div class="profile-grid">
+                <div class="profile-item">
+                    <small>Name</small>
+                    <strong id="p_name">-</strong>
+                </div>
+
+                <div class="profile-item">
+                    <small>Patient ID</small>
+                    <strong id="p_id">-</strong>
+                </div>
+
+                <div class="profile-item">
+                    <small>Age</small>
+                    <strong id="p_age">-</strong>
+                </div>
+
+                <div class="profile-item">
+                    <small>Weight</small>
+                    <strong><span id="p_weight">-</span> kg</strong>
+                </div>
+
+                <div class="profile-item">
+                    <small>Height</small>
+                    <strong><span id="p_height">-</span> cm</strong>
+                </div>
+
+                <div class="profile-item">
+                    <small>Gender</small>
+                    <strong id="p_gender">-</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-grid">
+
+            <div class="card-box">
+                <h5>CRRT Risk Prediction</h5>
+                <p class="text-muted small">Probability of requiring CRRT</p>
+
+                <div class="probability-display" id="probText">--%</div>
+
+                <div class="progress">
+                    <div id="probBar" class="progress-bar" style="width:0%"></div>
+                </div>
+
+                <span class="risk-badge" id="riskBadge">---</span>
+            </div>
+
+            <div class="card-box text-center">
+                <h5>Patient Priority Score</h5>
+                <p class="text-muted small">Clinical urgency classification</p>
+
+                <div class="priority-circle" id="priorityCircle">P?</div>
+                <div class="priority-text" id="priorityText">Pending Data</div>
+            </div>
+
+        </div>
+
+        <div class="interpretation mb-4">
+            <h5>
+                <i class="fas fa-stethoscope me-2"></i>
+                Clinical Interpretation
+            </h5>
+            <p id="interpretationText" class="mb-0">
+                Processing clinical parameters...
+            </p>
+        </div>
+
+        <div class="disclaimer mb-4">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Important Clinical Notice:</strong>
+            <p class="mt-2 mb-0">
+                This AI-powered system supports clinical decision-making and does not replace professional medical judgment.
+            </p>
+        </div>
+
+        <div class="action-buttons">
+            <a href="/patient_input" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i>
+                New Prediction
+            </a>
+
+            <a href="/history_page" class="btn btn-outline-success">
+                <i class="fas fa-history me-2"></i>
+                View History
+            </a>
+
+            <a href="/triage_page" class="btn btn-outline-danger">
+                <i class="fas fa-triangle-exclamation me-2"></i>
+                View Triage
+            </a>
+        </div>
+
+    </div>
+
+</main>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async function() {
+
+    try {
+
+        let result =
+            JSON.parse(localStorage.getItem("prediction_result"));
+
+        if (!result) {
+            document.getElementById("interpretationText").innerText =
+                "No prediction result found. Please create a new prediction first.";
+            return;
+        }
+
+        document.getElementById("p_name").innerText = result.patient_name || "-";
+        document.getElementById("p_id").innerText = result.patient_id || "-";
+        document.getElementById("p_age").innerText = result.age || "-";
+        document.getElementById("p_weight").innerText = result.weight || "-";
+        document.getElementById("p_height").innerText = result.height || "-";
+        document.getElementById("p_gender").innerText = result.gender || "-";
+
+        let probability = 0;
+
+        if (result.CRRT_probability !== undefined && result.CRRT_probability !== null) {
+            probability = result.CRRT_probability;
+        }
+        else if (result.probability !== undefined && result.probability !== null) {
+            probability = result.probability;
+        }
+        else if (result.prediction !== undefined && result.prediction !== null) {
+            probability = result.prediction;
+        }
+
+        let probabilityValue =
+            parseFloat(probability);
+
+        if (isNaN(probabilityValue)) {
+            probabilityValue = 0;
+        }
+
+        let prob =
+            (probabilityValue * 100).toFixed(2);
+
+        let probNumber =
+            parseFloat(prob);
+
+        let probElement =
+            document.getElementById("probText");
+
+        let probBar =
+            document.getElementById("probBar");
+
+        let riskBadge =
+            document.getElementById("riskBadge");
+
+        let pCircle =
+            document.getElementById("priorityCircle");
+
+        let pText =
+            document.getElementById("priorityText");
+
+        let interpretation =
+            document.getElementById("interpretationText");
+
+        probElement.innerText = prob + "%";
+        probBar.style.width = prob + "%";
+
+        probElement.className = "probability-display";
+        probBar.className = "progress-bar";
+
+        const riskLevel =
+            (result.risk_level || "").toUpperCase();
+
+        if (probNumber >= 70 || riskLevel.includes("HIGH")) {
+
+            probElement.classList.add("probability-high");
+            probBar.classList.add("bg-danger");
+
+            riskBadge.innerText = "High Risk";
+            riskBadge.className = "risk-badge badge-high";
+
+            pCircle.innerText = "P1";
+            pCircle.className = "priority-circle priority-p1";
+
+            pText.innerText = "High Priority";
+
+            interpretation.innerText =
+                "High risk of requiring Continuous Renal Replacement Therapy (CRRT). Immediate nephrology consultation is strongly recommended. Consider proactive monitoring and preparation for CRRT.";
+
+        } else if (probNumber >= 40 || riskLevel.includes("MEDIUM")) {
+
+            probElement.classList.add("probability-medium");
+            probBar.classList.add("bg-warning");
+
+            riskBadge.innerText = "Moderate Risk";
+            riskBadge.className = "risk-badge badge-medium";
+
+            pCircle.innerText = "P2";
+            pCircle.className = "priority-circle priority-p2";
+
+            pText.innerText = "Moderate Priority";
+
+            interpretation.innerText =
+                "Moderate risk of requiring CRRT. Close monitoring and reassessment are recommended.";
+
+        } else {
+
+            probElement.classList.add("probability-low");
+            probBar.classList.add("bg-success");
+
+            riskBadge.innerText = "Low Risk";
+            riskBadge.className = "risk-badge badge-low";
+
+            pCircle.innerText = "P3";
+            pCircle.className = "priority-circle priority-p3";
+
+            pText.innerText = "Low Priority";
+
+            interpretation.innerText =
+                "Low risk of requiring CRRT. Continue standard monitoring.";
+        }
+
+    } catch (err) {
+        console.error(err);
+        document.getElementById("interpretationText").innerText =
+            "Error loading prediction result.";
+    }
+
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

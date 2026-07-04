@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRRT CDSS Dashboard</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+:root{
+    --primary:#2563eb;
+    --sidebar:#ffffff;
+    --bg:#f5f8fc;
+    --text:#0f172a;
+    --muted:#64748b;
+    --border:#e2e8f0;
+    --danger:#ef4444;
+    --warning:#f97316;
+    --success:#22c55e;
+}
+
+body{
+    margin:0;
+    font-family:'Segoe UI',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+}
+
+.app{
+    display:flex;
+    min-height:100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    width:250px;
+    background:var(--sidebar);
+    border-right:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    position:fixed;
+    height:100vh;
+}
+
+.logo{
+    padding:20px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    border-bottom:1px solid var(--border);
+}
+
+.logo-icon{
+    width:42px;
+    height:42px;
+    background:var(--primary);
+    color:white;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+}
+
+.logo h4{
+    margin:0;
+    font-weight:700;
+    color:var(--text);
+}
+
+.logo span{
+    font-size:12px;
+    color:var(--muted);
+}
+
+.nav-menu{
+    padding:15px 12px;
+    flex:1;
+}
+
+.nav-menu a{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 14px;
+    color:#334155;
+    text-decoration:none;
+    border-radius:10px;
+    margin-bottom:6px;
+    font-weight:500;
+    font-size:14px;
+}
+
+.nav-menu a:hover,
+.nav-menu a.active{
+    background:#eaf2ff;
+    color:var(--primary);
+}
+
+.system-status{
+    margin:16px;
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    border-radius:14px;
+    padding:15px;
+    font-size:13px;
+}
+
+.status-dot{
+    width:8px;
+    height:8px;
+    background:var(--success);
+    border-radius:50%;
+    display:inline-block;
+    margin-right:6px;
+}
+
+/* MAIN */
+
+.main{
+    margin-left:250px;
+    width:calc(100% - 250px);
+}
+
+.topbar{
+    background:white;
+    border-bottom:1px solid var(--border);
+    padding:14px 28px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.user-info{
+    text-align:right;
+    font-size:13px;
+}
+
+.user-info strong{
+    display:block;
+}
+
+.content{
+    padding:30px 40px;
+}
+
+.page-title h2{
+    font-weight:700;
+    margin:0;
+}
+
+.page-title p{
+    color:var(--muted);
+    margin:5px 0 25px;
+}
+
+/* STATS */
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    margin-bottom:25px;
+}
+
+.stat-card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:22px;
+    box-shadow:0 4px 12px rgba(15,23,42,0.04);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.stat-card h6{
+    color:var(--muted);
+    font-size:13px;
+    margin-bottom:8px;
+}
+
+.stat-card h3{
+    font-size:30px;
+    font-weight:700;
+    margin:0;
+}
+
+.stat-icon{
+    width:44px;
+    height:44px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+}
+
+.blue{background:#dbeafe;color:var(--primary);}
+.red{background:#fee2e2;color:var(--danger);}
+.orange{background:#ffedd5;color:var(--warning);}
+.green{background:#dcfce7;color:var(--success);}
+
+/* ACTION CARDS */
+
+.action-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:22px;
+    margin-top:25px;
+}
+
+.action-card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:26px;
+    text-decoration:none;
+    color:var(--text);
+    box-shadow:0 4px 12px rgba(15,23,42,0.04);
+    transition:.25s;
+}
+
+.action-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 12px 25px rgba(15,23,42,0.10);
+    border-color:#bfdbfe;
+}
+
+.action-icon{
+    width:52px;
+    height:52px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    margin-bottom:18px;
+}
+
+.action-card h4{
+    font-size:18px;
+    font-weight:700;
+    margin-bottom:8px;
+}
+
+.action-card p{
+    color:var(--muted);
+    font-size:14px;
+    margin:0;
+}
+
+/* NOTICE */
+
+.notice{
+    margin-top:28px;
+    background:#eff6ff;
+    border-left:4px solid var(--primary);
+    border-radius:12px;
+    padding:18px 22px;
+    color:#1e3a8a;
+    font-size:14px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+    .sidebar{
+        position:relative;
+        width:100%;
+        height:auto;
+    }
+
+    .app{
+        flex-direction:column;
+    }
+
+    .main{
+        margin-left:0;
+        width:100%;
+    }
+
+    .topbar{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:10px;
+    }
+
+    .content{
+        padding:25px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-heartbeat"></i>
+            </div>
+            <div>
+                <h4>CRRT<span style="color:#2563eb;">CDSS</span></h4>
+                <span>Clinical Decision Support</span>
+            </div>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="/dashboard" class="active">
+                <i class="fas fa-th-large"></i> Dashboard
+            </a>
+            <a href="/patient_input">
+                <i class="fas fa-user-plus"></i> Patient Input
+            </a>
+            <a href="/batch_upload_page">
+                <i class="fas fa-upload"></i> Batch Upload
+            </a>
+            <a href="/history_page">
+                <i class="fas fa-history"></i> History
+            </a>
+            <a href="/results_page">
+                <i class="fas fa-chart-line"></i> Results
+            </a>
+            <a href="/triage_page">
+                <i class="fas fa-triangle-exclamation"></i> Triage
+            </a>
+            <a href="/reports_page">
+                <i class="fas fa-file-medical"></i> Reports
+            </a>
+        </nav>
+
+        <div class="system-status">
+            <strong>System Status</strong><br>
+            <span class="status-dot"></span>
+            Online & Connected
+        </div>
+
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <div class="topbar">
+            <div>
+                <strong>CRRT Clinical Decision Support System</strong>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <div class="user-info">
+                    <strong>Dr. zuyyin</strong>
+                    <span>St. Mary’s General Hospital</span>
+                </div>
+
+                <a href="/logout" class="btn btn-outline-danger btn-sm">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="content">
+
+            <div class="page-title">
+                <h2>Clinical Dashboard</h2>
+                <p>Welcome back. Select a module below to continue your CRRT assessment workflow.</p>
+            </div>
+
+        <!-- SUMMARY -->
+        <div class="stats-grid">
+
+                <div class="stat-card">
+                    <div>
+                        <h6>Total Assessments</h6>
+                        <h3 id="totalAssessments">0</h3>
+                    </div>
+                    <div class="stat-icon blue">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div>
+                        <h6>High Risk Cases</h6>
+                        <h3 id="highRiskCases">0</h3>
+                    </div>
+                    <div class="stat-icon red">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div>
+                        <h6>Today's Assessments</h6>
+                        <h3 id="todayAssessments">0</h3>
+                    </div>
+                    <div class="stat-icon orange">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div>
+                        <h6>System Accuracy</h6>
+                        <h3>92%</h3>
+                    </div>
+                    <div class="stat-icon green">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ACTION MODULES -->
+            <div class="action-grid">
+
+                <a href="/patient_input" class="action-card">
+                    <div class="action-icon blue">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h4>Patient Data Entry</h4>
+                    <p>Input patient clinical parameters for CRRT risk prediction.</p>
+                </a>
+
+                <a href="/triage_page" class="action-card">
+                    <div class="action-icon red">
+                        <i class="fas fa-triangle-exclamation"></i>
+                    </div>
+                    <h4>Triage Dashboard</h4>
+                    <p>Prioritize patients based on CRRT risk and clinical urgency.</p>
+                </a>
+
+                <a href="/history_page" class="action-card">
+                    <div class="action-icon green">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <h4>Prediction History</h4>
+                    <p>Review previous assessments and patient prediction records.</p>
+                </a>
+
+                <a href="/results_page" class="action-card">
+                    <div class="action-icon orange">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h4>Latest Results</h4>
+                    <p>View the latest CRRT prediction outcome and priority score.</p>
+                </a>
+
+                <a href="/batch_upload_page" class="action-card">
+                    <div class="action-icon blue">
+                        <i class="fas fa-file-upload"></i>
+                    </div>
+                    <h4>Batch Upload</h4>
+                    <p>Upload multiple patient records using CSV files for bulk prediction.</p>
+                </a>
+
+                <a href="/reports_page" class="action-card">
+                    <div class="action-icon green">
+                        <i class="fas fa-file-medical-alt"></i>
+                    </div>
+                    <h4>Clinical Reports</h4>
+                    <p>Generate and export clinical audit reports for review.</p>
+                </a>
+
+            </div>
+
+            <div class="notice">
+                <i class="fas fa-circle-info"></i>
+                <strong>Clinical Reminder:</strong>
+                This AI-powered tool supports clinical decision-making and should be used alongside professional medical judgment.
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+<script>
+async function loadDashboardStats(){
+
+    try {
+
+        const response = await fetch("/history");
+        const data = await response.json();
+
+        let total = data.length;
+        let today = 0;
+        let high = 0;
+
+        data.forEach(row => {
+
+            if ((row.risk_level || "").toUpperCase() === "HIGH") {
+                high++;
+            }
+
+            if (row.created_at) {
+
+                const createdText = String(row.created_at);
+
+                const todayText = new Date().toDateString();
+
+                const rowDate = new Date(createdText);
+
+                if (!isNaN(rowDate.getTime())) {
+                    if (rowDate.toDateString() === todayText) {
+                        today++;
+                    }
+                }
+            }
+
+        });
+
+        document.getElementById("totalAssessments").innerText = total;
+        document.getElementById("todayAssessments").innerText = today;
+        document.getElementById("highRiskCases").innerText = high;
+
+    } catch (error) {
+        console.error("Dashboard stats error:", error);
+    }
+}
+
+loadDashboardStats();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

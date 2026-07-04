@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Daily Report - CRRT CDSS</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+body{
+    background:#f5f8fc;
+    font-family:'Segoe UI',sans-serif;
+    color:#0f172a;
+}
+
+.report-header{
+    background:linear-gradient(135deg,#2563eb,#1e40af);
+    color:white;
+    border-radius:20px;
+    padding:30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 10px 25px rgba(37,99,235,.2);
+}
+
+.report-header h2{
+    font-weight:700;
+}
+
+.report-header p{
+    opacity:.9;
+}
+
+.action-card{
+    background:white;
+    padding:20px;
+    border-radius:16px;
+    box-shadow:0 4px 12px rgba(15,23,42,.05);
+}
+
+.summary-card{
+    background:white;
+    border-radius:16px;
+    padding:22px;
+    text-align:center;
+    box-shadow:0 4px 12px rgba(15,23,42,.05);
+    transition:.3s;
+}
+
+.summary-card:hover{
+    transform:translateY(-3px);
+}
+
+.summary-card h6{
+    color:#64748b;
+    font-size:14px;
+    margin-bottom:10px;
+}
+
+.summary-card h2{
+    font-weight:800;
+    margin:0;
+}
+
+.total h2{ color:#2563eb; }
+.high h2{ color:#ef4444; }
+.medium h2{ color:#f97316; }
+.low h2{ color:#22c55e; }
+
+.table-card{
+    background:white;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 4px 12px rgba(15,23,42,.05);
+}
+
+.table{
+    margin:0;
+}
+
+.table thead th{
+    background:#0f172a;
+    color:white;
+    border:none;
+    padding:15px;
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+}
+
+.table tbody td{
+    padding:14px;
+    vertical-align:middle;
+}
+
+.risk-badge{
+    padding:6px 14px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:700;
+}
+
+.badge-high{
+    background:#fee2e2;
+    color:#ef4444;
+}
+
+.badge-medium{
+    background:#ffedd5;
+    color:#f97316;
+}
+
+.badge-low{
+    background:#dcfce7;
+    color:#22c55e;
+}
+
+.prob-high{
+    color:#ef4444;
+    font-weight:700;
+}
+
+.prob-medium{
+    color:#f97316;
+    font-weight:700;
+}
+
+.prob-low{
+    color:#22c55e;
+    font-weight:700;
+}
+
+.status-box{
+    border-radius:12px;
+    padding:15px 18px;
+}
+
+@media(max-width:768px){
+    .report-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container-fluid p-4">
+
+    <!-- HEADER -->
+    <div class="report-header mb-4">
+
+        <div>
+            <h2 class="mb-1">
+                <i class="fas fa-calendar-day me-2"></i>
+                Daily Assessment Report
+            </h2>
+
+            <p class="mb-0">
+                Daily CRRT assessment summary and patient risk distribution
+            </p>
+        </div>
+
+        <a href="/reports_page" class="btn btn-light">
+            <i class="fas fa-arrow-left me-1"></i>
+            Back to Reports
+        </a>
+
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="action-card mb-4">
+
+        <div class="d-flex gap-2 flex-wrap">
+
+            <button
+                class="btn btn-primary"
+                onclick="generateDailyReport()">
+
+                <i class="fas fa-chart-bar me-1"></i>
+                Generate Report
+
+            </button>
+
+            <button
+                class="btn btn-danger"
+                onclick="window.open('/generate_daily_pdf', '_blank')">
+
+                <i class="fas fa-file-pdf me-1"></i>
+                Export PDF
+
+            </button>
+
+            <button
+                class="btn btn-success"
+                onclick="window.location.href='/export_daily_csv'">
+
+                <i class="fas fa-file-csv me-1"></i>
+                Export CSV
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- STATUS MESSAGE -->
+    <div id="statusMessage" class="alert status-box d-none"></div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="row mb-4">
+
+        <div class="col-md-3 mb-3">
+            <div class="summary-card total">
+                <h6>Total Patients</h6>
+                <h2 id="totalPatients">0</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="summary-card high">
+                <h6>High Risk</h6>
+                <h2 id="highRisk">0</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="summary-card medium">
+                <h6>Medium Risk</h6>
+                <h2 id="mediumRisk">0</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="summary-card low">
+                <h6>Low Risk</h6>
+                <h2 id="lowRisk">0</h2>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead>
+                    <tr>
+                        <th>Patient Code</th>
+                        <th>Patient Name</th>
+                        <th>Probability</th>
+                        <th>Risk Level</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+
+                <tbody id="reportBody">
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            Click Generate Report to load daily data.
+                        </td>
+                    </tr>
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+async function generateDailyReport(){
+
+    const status =
+        document.getElementById("statusMessage");
+
+    status.className = "alert alert-info status-box";
+    status.innerHTML =
+        '<i class="fas fa-spinner fa-spin me-2"></i>Generating daily report...';
+
+    await loadDailyReport();
+
+    status.className = "alert alert-success status-box";
+    status.innerHTML =
+        '<i class="fas fa-check-circle me-2"></i>Daily report generated successfully.';
+}
+
+async function loadDailyReport(){
+
+    try {
+
+        const response =
+            await fetch("/api/daily_report");
+
+        const data =
+            await response.json();
+
+        let tbody =
+            document.getElementById("reportBody");
+
+        tbody.innerHTML = "";
+
+        let high = 0;
+        let medium = 0;
+        let low = 0;
+
+        if (!data || data.length === 0) {
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        No daily assessment records found.
+                    </td>
+                </tr>
+            `;
+
+            document.getElementById("totalPatients").innerText = 0;
+            document.getElementById("highRisk").innerText = 0;
+            document.getElementById("mediumRisk").innerText = 0;
+            document.getElementById("lowRisk").innerText = 0;
+
+            return;
+        }
+
+        data.forEach(row => {
+
+            const risk =
+                (row.risk_level || "").toUpperCase();
+
+            let badgeClass = "badge-low";
+            let probClass = "prob-low";
+
+            if (risk === "HIGH") {
+                high++;
+                badgeClass = "badge-high";
+                probClass = "prob-high";
+            }
+
+            else if (risk === "MEDIUM") {
+                medium++;
+                badgeClass = "badge-medium";
+                probClass = "prob-medium";
+            }
+
+            else {
+                low++;
+            }
+
+            const probability =
+                (parseFloat(row.crrt_probability || 0) * 100).toFixed(2);
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${row.patient_code || "-"}</strong></td>
+                    <td>${row.full_name || "-"}</td>
+                    <td class="${probClass}">${probability}%</td>
+                    <td>
+                        <span class="risk-badge ${badgeClass}">
+                            ${row.risk_level || "-"}
+                        </span>
+                    </td>
+                    <td>${row.created_at || "-"}</td>
+                </tr>
+            `;
+
+        });
+
+        document.getElementById("totalPatients").innerText = data.length;
+        document.getElementById("highRisk").innerText = high;
+        document.getElementById("mediumRisk").innerText = medium;
+        document.getElementById("lowRisk").innerText = low;
+
+    } catch (error) {
+
+        console.error(error);
+
+        document.getElementById("statusMessage").className =
+            "alert alert-danger status-box";
+
+        document.getElementById("statusMessage").innerHTML =
+            '<i class="fas fa-exclamation-triangle me-2"></i>Failed to generate daily report.';
+    }
+}
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
